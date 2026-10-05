@@ -77,9 +77,16 @@ Every field above is required except `notes`. If a field genuinely doesn't apply
 (e.g. no backup possible for a config toggle), write `null` explicitly rather than
 omitting the key — an omitted key is indistinguishable from an oversight.
 
+## Tooling
+
+`tools/tasks_store.py` implements the write protocol above; agents call it through `tools/tasks_cli.py`
+and never edit `tasks.json` by hand. Valid statuses: `todo`, `in_progress`, `waiting`, `blocked`,
+`review`, `done`.
+
 ## Verification gate (see project-manager SKILL.md for the full policy)
 
-No task-owning agent marks a task `done` in `tasks.json` without first appending a
-changelog entry with `verified_by`, `verification_method`, and `side_effects_checked`
-filled in. `progress-dashboard` treats a `done` task with a missing changelog entry as
+Task-owning agents never mark a task `done`. They append a changelog entry with
+`verified_by`, `verification_method`, and `side_effects_checked` filled in, then move the task to
+`review`. Only `project-manager` sets `done`, and `tools/tasks_store.py` refuses it unless the
+client's changelog has an entry for the task. `progress-dashboard` treats a `done` task with a missing changelog entry as
 a data-integrity error, not a normal state, and surfaces it.

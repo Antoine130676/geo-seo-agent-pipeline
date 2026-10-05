@@ -23,7 +23,8 @@ from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
 
-VALID_STATUSES = ("todo", "in_progress", "waiting", "blocked", "done")
+VALID_STATUSES = ("todo", "in_progress", "waiting", "blocked", "review", "done")
+CLOSER = "project-manager"  # the only agent allowed to mark a task done
 
 
 class LockTimeout(Exception):
@@ -32,6 +33,10 @@ class LockTimeout(Exception):
 
 class StaleLockError(Exception):
     """The lock is older than stale_after seconds. Surfaced, never broken silently."""
+
+
+class NotAuthorized(Exception):
+    """The actor is not allowed to make this change."""
 
 
 class InvalidTask(ValueError):
@@ -151,14 +156,30 @@ def add_task(task, state_dir=None, **lock_args):
     return task
 
 
-def set_status(task_id, status, blocked_reason=None, state_dir=None, **lock_args):
+def set_status(task_id, status, actor, blocked_reason=None, state_dir=None, **lock_args):
+    """Change a task's status as `actor`.
+
+    - An agent may only change tasks it owns; project-manager may change any task.
+    - Only project-manager may set `done`, and only if the client's changelog has an
+      entry for the task. Other agents finish work by moving the task to `review`.
+    """
+    import changelog  # local import: changelog depends on this module
+
     def change(tasks):
         for t in tasks:
-            if t["id"] == task_id:
-                t["status"] = status
-                t["blocked_reason"] = blocked_reason
-                t["updated_at"] = _now()
-                return
+            if t["id"] != task_id:
+                continue
+            if actor != CLOSER and t.get("owner") != actor:
+                raise NotAuthorized(f"{actor} does not own {task_id} (owner: {t.get('owner')})")
+            if status == "done":
+                if actor != CLOSER:
+                    raise NotAuthorized(f"only {CLOSER} may mark a task done; move it to 'review' instead")
+                if not changelog.has_entry(t["client"], task_id, state_dir):
+                    raise InvalidTask(f"{task_id} has no changelog entry; it cannot be marked done")
+            t["status"] = status
+            t["blocked_reason"] = blocked_reason
+            t["updated_at"] = _now()
+            return
         raise InvalidTask(f"no such task {task_id}")
 
     update_tasks(change, state_dir, **lock_args)

@@ -1,7 +1,7 @@
 ---
 name: analytics-tracking
 description: Confirm a client can actually measure GEO/SEO impact, and build the AI-referral attribution layer that GA4 doesn't provide by default. Use in parallel with the content pipeline (independent of Metadata/GEO agents), whenever a client asks "how do I know this is working," or when setting up AI-visibility ROI reporting for the first time.
-version: 1.0.0
+version: 1.1.0
 ---
 
 # Analytics & Tracking Agent
@@ -24,3 +24,15 @@ Access confirmation, sitemap status, and a working AI-referral tracking view. Th
 
 ## Handoff
 Uses Technical Health's redirect/URL findings to correctly interpret indexing data. Runs independently of the Metadata/GEO/Content pipeline — no need to wait on those agents.
+
+## Task state (shared store)
+
+Never edit `tasks.json` by hand. Use `tools/tasks_cli.py` (protocol in
+`docs/orchestrator/CONVENTIONS.md`), always identifying yourself with `--as analytics-tracking`:
+
+- Start work: `status <id> in_progress --as analytics-tracking`
+- Blocked: `status <id> blocked --as analytics-tracking --blocked-reason "<why>"`
+- Finished: append a changelog entry (`changelog ...`, with the verification method and the
+  side effects you checked), then `status <id> review --as analytics-tracking`.
+- **Never mark a task `done`.** Only `project-manager` closes tasks, after checking the safety gate.
+  The store refuses `done` from any other agent.

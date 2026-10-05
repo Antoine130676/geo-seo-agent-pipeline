@@ -1,7 +1,7 @@
 ---
 name: progress-dashboard
 description: Maintain a backend progress dashboard showing the status of every task the Project Manager has assigned across all client agents (Technical Health, Metadata, GEO, Analytics, Content Expansion, Client Reporting). Use whenever a new task is created or updated by any agent, on a schedule to regenerate the dashboard view, or when asked "what's the status of everything right now."
-version: 1.4.0
+version: 1.5.0
 ---
 
 # Progress Dashboard Agent
@@ -33,7 +33,7 @@ Each task is an object:
 }
 ```
 
-`status` is always one of: `todo`, `in_progress`, `waiting`, `blocked`, `done`.
+`status` is always one of: `todo`, `in_progress`, `waiting`, `blocked`, `review`, `done`. `review` means the owning agent finished and is waiting for project-manager to verify; only project-manager sets `done`.
 `agent` is always one of the 6 technical agent skill names — the capability that created
 the task. `owner` starts equal to `agent` but is a separate field because
 project-manager can reassign an in-flight task to a different agent; the dashboard
@@ -62,7 +62,7 @@ escalated to the human, not a normal in-flight task).
 
 ## Output format
 A static HTML file (or locally served page) at `~/.hermes/dashboard/index.html`, regenerated on every state change, laid out as a kanban board:
-- One column per status (Todo, In progress, Waiting, Blocked, Done), each headed by a count
+- One column per status (Todo, In progress, Waiting, Blocked, Review, Done), each headed by a count
 - One card per task, filterable by client — card shows task ID, owner, title, created date, last-updated age, client, and blocked reason where relevant
 - A progress-by-client panel above the board: percentage of that client's tasks marked `done`, as both a number and a filled bar, next to the client's engagement start date/time — recalculated on every render, never cached from a prior view
 - Each client filter shows that client's engagement `start_datetime` (from project-manager's engagement record, set by account-manager's handoff) directly beside the client name — never inferred from the first task's timestamp, since that can predate or postdate actual kickoff
@@ -71,3 +71,5 @@ A static HTML file (or locally served page) at `~/.hermes/dashboard/index.html`,
 
 ## Handoff
 Reads from every technical agent and from Project Manager (who is the one that assigns tasks and moves them between agents). Writes nothing back except the rendered dashboard file itself.
+
+Rendered by `tools/render_progress.py`, which is read-only. A card in `done` with no changelog entry is marked UNVERIFIED.

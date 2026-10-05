@@ -21,3 +21,6 @@ handoffs or scheduled retainer triggers. Added account-manager's
 Added "onboarding stuck" as its own critical notification category,
 distinct from "new engagement ready," fired by account-manager after
 3 failed credential-verification attempts on the same credential.
+
+## 1.6.0 - 2026-10-06
+Project-manager is the only agent that marks tasks `done`, from `review`, after the safety gate; enforced by the task store.

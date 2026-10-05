@@ -1,7 +1,7 @@
 ---
 name: backlink-authority
 description: Audit and grow a client's off-page authority — backlink profile health, toxic-link detection, competitor gap analysis, and outreach opportunities. Use for a new client's initial link audit, when a client asks why competitors outrank them despite similar on-page work, or on a recurring schedule to catch new/lost backlinks. Runs independently of the on-page pipeline, in parallel with Analytics & Tracking.
-version: 1.0.0
+version: 1.1.0
 ---
 
 # Backlink & Authority Agent
@@ -44,3 +44,15 @@ Referring-domain summary, toxic-link disavow candidates (flagged, not auto-actio
 
 ## Handoff
 Toxic-link findings and disavow candidates go to Client Reporting tagged "needs your decision," same as GEO Agent's brand-collision flags. Outreach drafts wait in a distinct "pending approval" bucket separate from Content Expansion's client-approval queue, since the approver here may be you rather than the client depending on scope.
+
+## Task state (shared store)
+
+Never edit `tasks.json` by hand. Use `tools/tasks_cli.py` (protocol in
+`docs/orchestrator/CONVENTIONS.md`), always identifying yourself with `--as backlink-authority`:
+
+- Start work: `status <id> in_progress --as backlink-authority`
+- Blocked: `status <id> blocked --as backlink-authority --blocked-reason "<why>"`
+- Finished: append a changelog entry (`changelog ...`, with the verification method and the
+  side effects you checked), then `status <id> review --as backlink-authority`.
+- **Never mark a task `done`.** Only `project-manager` closes tasks, after checking the safety gate.
+  The store refuses `done` from any other agent.

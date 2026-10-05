@@ -33,7 +33,7 @@ Dashboards: Progress (internal, read-only task board) | Performance (client-faci
 ## Design principles
 
 1. **Verify, don't trust the tool.** Agents are told to confirm results out-of-band (view-source, incognito fetch, the site's own aggregation endpoint) because CMS dashboards and tool fetches can be stale.
-2. **Finishing is not verifying.** A task is `done` only with a changelog entry containing the verification method, side effects checked and a backup/rollback reference.
+2. **Finishing is not verifying.** Agents finish at `review`; only the project manager marks a task `done`, and only with a changelog entry containing the verification method, side effects checked and a backup/rollback reference.
 3. **Humans approve what is irreversible or outward-facing.** Credentials, kickoff, backlink-outreach emails, disavow files, published content and out-of-scope changes all wait for explicit approval.
 4. **The agents get tested too.** A change to a `SKILL.md` runs against a staging site with seeded issues and a golden file of expected findings before it can go live, with archived versions for rollback.
 5. **Different audiences, different documents.** The same findings become a shallow pre-sale teaser, a plain-English client update, or a precise developer handoff.
@@ -68,12 +68,12 @@ See [docs/architecture.md](docs/architecture.md) for the shared state contract a
 - Audit types: comprehensive GEO/SEO, technical, analytics tracking, competitor intelligence.
 - Every finding carries a severity, who fixes it (self-serve or developer), step-by-step remediation and a way to verify the fix.
 - Per-project token and cost logging.
-- A working task store implementing the lock protocol ([`tools/tasks_store.py`](tools/tasks_store.py)): atomic mkdir lock with backoff and a retry cap, stale locks surfaced instead of broken, atomic rename so readers never see a partial file, and validation that rejects malformed tasks. Eight tests cover 8 concurrent writers losing nothing, readers during writes, error cleanup, lock timeout, stale locks and validation. Run them with `python -m unittest tests.test_tasks_store`.
+- A working task store and CLI ([`tools/`](tools/)) implementing the lock protocol: atomic mkdir lock with backoff and a retry cap, stale locks surfaced instead of broken, atomic rename so readers never see a partial file, validation that rejects malformed tasks. Authorization is enforced in code: agents change only their own tasks, finish at `review`, and only the project manager can mark a task `done`, and only when the client's append-only changelog has an entry for it. A read-only progress dashboard is rendered from the same file. 13 tests cover concurrent writers, readers during writes, error cleanup, lock timeouts, stale locks, validation, authorization and the dashboard. Run them with `python -m unittest discover -s tests`.
 
 **Roadmap**
 - Outcome tracking: before/after measurement per site (citations, traffic, fixes applied).
 - Stand up the staging site and its golden file, so changes to the agents are regression-tested before release (the process is specified in `skill-release-manager`).
-- Wire the task store into the agents and dashboards, and add per-client changelogs (protocol documented in `docs/orchestrator/CONVENTIONS.md`; the store itself is built and tested).
+- Roll the updated agent specs (task store, `review` status, project-manager closes tasks) into the live Hermes skills through the staging process, then run it on a real engagement (the store, CLI and specs are built and tested here).
 
 ## Built with
 

@@ -1,7 +1,7 @@
 ---
 name: project-manager
 description: Track engagements across all clients — deadlines, follow-ups, blocked items, and who owes what. Use when starting a new client engagement, checking status across multiple clients, deciding what to work on next, or when a client asks "where are we." Sits above the 7 technical agents and the orchestrator; the orchestrator sequences agents within one client run, this agent sequences and prioritizes across all client runs and time.
-version: 1.5.0
+version: 1.6.0
 ---
 
 # Project Manager Agent
@@ -90,3 +90,17 @@ and a checklist, same rigor as kickoff.
 - Feeds the Orchestrator a per-client "go" signal when a run should start: a new account-manager handoff, a scheduled retainer check, or a client responding to a pending decision.
 - Receives status buckets from Client Reporting after every run and folds them into the live engagement record.
 - Escalates scope-creep flags directly to you rather than routing them through the technical agents.
+
+## Closing tasks (only this agent marks a task done)
+
+No other agent can set `done`; the task store (`tools/tasks_store.py`) refuses it. Agents finish by moving a
+task to `review`, and this agent closes it:
+
+- [ ] Pick up every task in `review` (`tasks_cli.py list --status review`).
+- [ ] Check the safety gate above: changelog entry with real `verified_by`, `verification_method` and
+  `side_effects_checked`, a backup reference for live-site changes, out-of-band verification, a rollback plan.
+- [ ] Gate passes: `tasks_cli.py status <id> done --as project-manager`. The store also refuses `done` if the
+  client's changelog has no entry for the task.
+- [ ] Gate fails: send it back with `status <id> in_progress --as project-manager` and a note naming what is
+  missing. Never close a task because the work looks finished.
+- [ ] Anything irreversible or out of scope goes to "needs your decision" instead of being closed.

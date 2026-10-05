@@ -90,14 +90,14 @@ class TasksStoreTests(unittest.TestCase):
     def test_invalid_tasks_are_rejected_and_nothing_is_written(self):
         ts.add_task({"id": "ok", "client": "c", "agent": "x", "status": "todo"}, state_dir=self.dir)
         with self.assertRaises(ts.InvalidTask):
-            ts.set_status("ok", "blocked", state_dir=self.dir)  # blocked needs a reason
+            ts.set_status("ok", "blocked", "x", state_dir=self.dir)  # blocked needs a reason
         with self.assertRaises(ts.InvalidTask):
-            ts.set_status("ok", "finished", state_dir=self.dir)  # not a valid status
+            ts.set_status("ok", "finished", "x", state_dir=self.dir)  # not a valid status
         self.assertEqual(ts.read_tasks(self.dir)[0]["status"], "todo")
 
     def test_status_transition_updates_timestamp_only(self):
         t = ts.add_task({"id": "s", "client": "c", "agent": "x", "status": "todo"}, state_dir=self.dir)
-        ts.set_status("s", "blocked", blocked_reason="waiting on DNS", state_dir=self.dir)
+        ts.set_status("s", "blocked", "x", blocked_reason="waiting on DNS", state_dir=self.dir)
         got = ts.read_tasks(self.dir)[0]
         self.assertEqual(got["created_at"], t["created_at"])
         self.assertEqual(got["blocked_reason"], "waiting on DNS")

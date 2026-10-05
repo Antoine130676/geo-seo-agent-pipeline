@@ -9,3 +9,6 @@ progress-dashboard + skill-release-manager).
 Added the teaser register: category-and-severity-only reporting for unpaid
 prospects, with a headline score and strict limits on what can be disclosed
 before payment (no exact URLs, no specific fixes, no remediation detail).
+
+## 1.2.0 - 2026-10-06
+Finished work now goes to `review` through the task store; only project-manager marks a task `done`. Added a Task state section.

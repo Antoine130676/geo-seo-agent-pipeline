@@ -1,7 +1,7 @@
 ---
 name: metadata-onpage-seo
 description: Audit and draft on-page SEO fundamentals (titles, meta descriptions, keyphrases) across every indexable page of a client site. Use after the Technical Health agent has confirmed which pages are actually serving correctly. Also use when a client asks for metadata review, title/description drafts, or reports a page ranking poorly.
-version: 1.0.0
+version: 1.1.0
 ---
 
 # Metadata & On-Page SEO Agent
@@ -27,3 +27,15 @@ Page-by-page metadata status, plus ready-to-paste drafts for anything missing or
 
 ## Handoff
 Pass completed/corrected metadata state to the GEO Agent — schema and llms.txt work depends on metadata already being correct.
+
+## Task state (shared store)
+
+Never edit `tasks.json` by hand. Use `tools/tasks_cli.py` (protocol in
+`docs/orchestrator/CONVENTIONS.md`), always identifying yourself with `--as metadata-onpage-seo`:
+
+- Start work: `status <id> in_progress --as metadata-onpage-seo`
+- Blocked: `status <id> blocked --as metadata-onpage-seo --blocked-reason "<why>"`
+- Finished: append a changelog entry (`changelog ...`, with the verification method and the
+  side effects you checked), then `status <id> review --as metadata-onpage-seo`.
+- **Never mark a task `done`.** Only `project-manager` closes tasks, after checking the safety gate.
+  The store refuses `done` from any other agent.

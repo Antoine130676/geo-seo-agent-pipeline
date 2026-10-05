@@ -1,7 +1,7 @@
 ---
 name: content-expansion
 description: Draft substantive content additions for thin pages without disturbing existing approved copy. Use when a page is identified as under-depth relative to its commercial importance, or when a client requests more content on a specific page/service. Output must never auto-publish — always requires explicit client approval before being treated as done.
-version: 1.2.0
+version: 1.3.0
 ---
 
 # Content Expansion Agent
@@ -40,3 +40,15 @@ On rejection, project-manager reopens this task with the client's note attached 
 resubmit under the same task ID. After 2 rejected revisions, project-manager escalates
 to the human instead of accepting a 3rd automated resubmission — don't keep guessing
 past that point.
+
+## Task state (shared store)
+
+Never edit `tasks.json` by hand. Use `tools/tasks_cli.py` (protocol in
+`docs/orchestrator/CONVENTIONS.md`), always identifying yourself with `--as content-expansion`:
+
+- Start work: `status <id> in_progress --as content-expansion`
+- Blocked: `status <id> blocked --as content-expansion --blocked-reason "<why>"`
+- Finished: append a changelog entry (`changelog ...`, with the verification method and the
+  side effects you checked), then `status <id> review --as content-expansion`.
+- **Never mark a task `done`.** Only `project-manager` closes tasks, after checking the safety gate.
+  The store refuses `done` from any other agent.

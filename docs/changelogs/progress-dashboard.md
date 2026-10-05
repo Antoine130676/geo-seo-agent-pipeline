@@ -19,3 +19,6 @@ Cards now show created date and owner explicitly (owner is a distinct field
 from agent, since project-manager can reassign a task). Added a per-client
 progress panel (percent done + bar) above the board, recomputed on every
 render.
+
+## 1.5.0 - 2026-10-06
+Added the `review` status and column; `done` without a changelog entry renders as UNVERIFIED. Renderer: tools/render_progress.py.

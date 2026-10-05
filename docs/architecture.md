@@ -40,7 +40,7 @@ All agents write to one task file so the dashboards have a single source of trut
 }
 ```
 
-- `status` is one of `todo | in_progress | waiting | blocked | done`.
+- `status` is one of `todo | in_progress | waiting | blocked | review | done`. Agents finish at `review`; only project-manager sets `done`.
 - `agent` is the capability that created the task; `owner` can differ after reassignment.
 - `blocked_reason` is required when `status` is `blocked`.
 - `revision_count` and `client_note` support the client-approval loop (two rejections escalate to the human).
@@ -48,6 +48,7 @@ All agents write to one task file so the dashboards have a single source of trut
 
 ## Safety gate (before any task is `done`)
 
+0. Only project-manager marks a task `done` (enforced in code), moving it from `review`.
 1. Changelog entry with `verified_by`, `verification_method`, `side_effects_checked`.
 2. Backup or pre-change snapshot referenced for any live-site change.
 3. Out-of-band verification, not the tool's own cached fetch.

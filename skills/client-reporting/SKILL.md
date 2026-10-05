@@ -1,7 +1,7 @@
 ---
 name: client-reporting
 description: Translate findings from the other GEO/SEO agents (Technical Health, Metadata, GEO/AI-Visibility, Analytics, Content Expansion) into the right format for the right audience. Use whenever preparing a client update, a developer handoff, or any document meant to leave the internal workspace. Always runs LAST in the pipeline.
-version: 1.1.0
+version: 1.2.0
 ---
 
 # Client Reporting Agent
@@ -42,3 +42,15 @@ Translate everything the other agents found into the right format for the right 
 
 ## Note
 This agent runs last, after all other agents' findings are tagged by audience and status bucket.
+
+## Task state (shared store)
+
+Never edit `tasks.json` by hand. Use `tools/tasks_cli.py` (protocol in
+`docs/orchestrator/CONVENTIONS.md`), always identifying yourself with `--as client-reporting`:
+
+- Start work: `status <id> in_progress --as client-reporting`
+- Blocked: `status <id> blocked --as client-reporting --blocked-reason "<why>"`
+- Finished: append a changelog entry (`changelog ...`, with the verification method and the
+  side effects you checked), then `status <id> review --as client-reporting`.
+- **Never mark a task `done`.** Only `project-manager` closes tasks, after checking the safety gate.
+  The store refuses `done` from any other agent.

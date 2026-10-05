@@ -1,7 +1,7 @@
 ---
 name: geo-ai-visibility
 description: Ensure a client site is structured for AI tools (ChatGPT, Perplexity, Gemini, AI Overviews) to find and accurately describe it. Use after the Metadata & On-Page SEO agent has finished, for any GEO/AI-visibility audit, or whenever a client asks why AI engines aren't citing or correctly describing their business. This is the differentiator vs. a standard SEO audit.
-version: 1.1.0
+version: 1.2.0
 ---
 
 # GEO / AI-Visibility Agent
@@ -30,3 +30,15 @@ GEO infrastructure status, specific enablement/config instructions, and any bran
 
 ## Handoff
 Strategic items (brand collision, positioning conflicts) go to the Client Reporting Agent tagged as "needs your decision," not "completed" or "in progress."
+
+## Task state (shared store)
+
+Never edit `tasks.json` by hand. Use `tools/tasks_cli.py` (protocol in
+`docs/orchestrator/CONVENTIONS.md`), always identifying yourself with `--as geo-ai-visibility`:
+
+- Start work: `status <id> in_progress --as geo-ai-visibility`
+- Blocked: `status <id> blocked --as geo-ai-visibility --blocked-reason "<why>"`
+- Finished: append a changelog entry (`changelog ...`, with the verification method and the
+  side effects you checked), then `status <id> review --as geo-ai-visibility`.
+- **Never mark a task `done`.** Only `project-manager` closes tasks, after checking the safety gate.
+  The store refuses `done` from any other agent.

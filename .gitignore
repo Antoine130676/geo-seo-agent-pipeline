@@ -3,3 +3,5 @@ Thumbs.db
 *.log
 .env
 docs/profile-draft.md
+__pycache__/
+*.pyc
