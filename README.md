@@ -61,18 +61,17 @@ See [docs/architecture.md](docs/architecture.md) for the shared state contract a
 
 ## Status
 
-| Claim | Evidence |
-|---|---|
-| 13 agent specifications exist, versioned | `skills/` (this repo) |
-| Run order, handoffs, guardrails are defined | `skills/*/SKILL.md`, `docs/architecture.md` |
-| Cost logging per project is part of the workflow | `geo-client-workflow` |
-| Run on real sites | 8+ live sites audited between Aug and Oct 2026 (Estonia-based: property agency, restaurants, manufacturer, retail, e-commerce), each with written audit reports (HTML/PDF/Markdown). Names withheld. |
-| Audit types produced | Comprehensive GEO/SEO, technical, analytics-tracking, competitor intelligence. Each finding carries a severity, who fixes it (self-serve vs. developer), step-by-step remediation and a way to verify the fix. |
-| Measured outcomes (citation/traffic gains, hours saved) | `[none claimed yet; audits delivered, results not yet measured]` |
-| Staging client and golden file implemented | `[to confirm: specified in skill-release-manager; not found on the author's machine at time of writing]` |
-| Shared state (`tasks.json`, changelog, `CONVENTIONS.md`) implemented | `[to confirm: referenced by the skills; not found on the author's machine at time of writing]` |
+**In use today**
+- 13 versioned agent specifications with defined run order, handoffs and guardrails (`skills/`, `docs/architecture.md`).
+- Run on 8+ live sites between Aug and Oct 2026 (property agency, restaurants, manufacturer, retail, e-commerce; Estonia). Each produced a written audit in HTML/PDF/Markdown. Client names withheld.
+- Audit types: comprehensive GEO/SEO, technical, analytics tracking, competitor intelligence.
+- Every finding carries a severity, who fixes it (self-serve or developer), step-by-step remediation and a way to verify the fix.
+- Per-project token and cost logging.
 
-Items in brackets are deliberately open. Fill them with facts or leave them out.
+**Roadmap**
+- Outcome tracking: before/after measurement per site (citations, traffic, fixes applied).
+- Staging site with a golden file, so changes to the agents are regression-tested before release (specified in `skill-release-manager`).
+- Shared state layer (task file, append-only changelog, conventions doc) behind the dashboards (specified in `docs/architecture.md`).
 
 ## Built with
 

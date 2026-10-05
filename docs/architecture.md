@@ -64,6 +64,6 @@ All agents write to one task file so the dashboards have a single source of trut
 
 Edit in staging, run the whole pipeline against a disposable staging site with seeded issues, compare to a golden file, promote only on a full pass, archive the last three versions, and log every promotion or rollback.
 
-## Open items
+## Roadmap notes
 
 Referenced by the skills but not yet documented here: the shared conventions file, the credentials-handling doc, and the staging golden file. Add them or remove the references before publishing.
