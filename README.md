@@ -39,6 +39,11 @@ Dashboards: Progress (internal, read-only task board) | Performance (client-faci
 5. **Different audiences, different documents.** The same findings become a shallow pre-sale teaser, a plain-English client update, or a precise developer handoff.
 6. **Honest scoring.** Scores show which run they came from; a score drop is labelled regression vs. scope growth; stale data is labelled, never passed off as current.
 
+## See it work
+
+- **Sample audit:** [examples/sample-audit.md](examples/sample-audit.md) is an anonymized real audit (domain and brand names replaced). It shows the deliverable: a 50/100 score, 11 findings ranked as critical, warnings and recommendations, a named fixer for each, step-by-step fixes and a way to verify each one.
+- **Live demo of the control rules:** `python examples/demo.py` (about a second, fake data, no dependencies beyond Python 3). It shows four rules holding: an agent cannot close its own task, an agent cannot touch another agent's task, a blocked task must say why, and even the project manager cannot close a task without a changelog entry. Add `--out dashboard.html` to keep the rendered progress board.
+
 ## Agents
 
 | Agent | Job | Key guardrail |

@@ -5,3 +5,4 @@ Thumbs.db
 docs/profile-draft.md
 __pycache__/
 *.pyc
+examples/demo-dashboard.html
