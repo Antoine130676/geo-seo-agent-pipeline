@@ -62,7 +62,8 @@ See [docs/architecture.md](docs/architecture.md) for the shared state contract a
 ## Status
 
 **In use today**
-- 13 versioned agent specifications with defined run order, handoffs and guardrails (`skills/`, `docs/architecture.md`).
+- 13 versioned agent specifications with defined run order, handoffs and guardrails (`skills/`, per-skill changelogs in `docs/changelogs/`).
+- Orchestration and shared conventions: run order and client entry path ([orchestrator](docs/orchestrator/README.md)), the task-file write protocol and append-only changelog format ([conventions](docs/orchestrator/CONVENTIONS.md)), and credential handling with scoped tokens, a secrets manager, just-in-time fetch and an access log ([credentials](docs/orchestrator/CREDENTIALS.md)).
 - Run on 8+ live sites between Aug and Oct 2026 (property agency, restaurants, manufacturer, retail, e-commerce; Estonia). Each produced a written audit in HTML/PDF/Markdown. Client names withheld.
 - Audit types: comprehensive GEO/SEO, technical, analytics tracking, competitor intelligence.
 - Every finding carries a severity, who fixes it (self-serve or developer), step-by-step remediation and a way to verify the fix.
@@ -70,8 +71,8 @@ See [docs/architecture.md](docs/architecture.md) for the shared state contract a
 
 **Roadmap**
 - Outcome tracking: before/after measurement per site (citations, traffic, fixes applied).
-- Staging site with a golden file, so changes to the agents are regression-tested before release (specified in `skill-release-manager`).
-- Shared state layer (task file, append-only changelog, conventions doc) behind the dashboards (specified in `docs/architecture.md`).
+- Stand up the staging site and its golden file, so changes to the agents are regression-tested before release (the process is specified in `skill-release-manager`).
+- Run the shared state layer (task file and per-client changelogs) live behind the dashboards (protocol documented in `docs/orchestrator/CONVENTIONS.md`).
 
 ## Built with
 

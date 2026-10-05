@@ -66,4 +66,4 @@ Edit in staging, run the whole pipeline against a disposable staging site with s
 
 ## Roadmap notes
 
-Planned next: documents for the shared conventions, credentials handling and the staging golden file, which the skills already reference.
+Shared conventions and credential handling are documented in [docs/orchestrator](orchestrator/). The staging site and its golden file are the next pieces to stand up.
