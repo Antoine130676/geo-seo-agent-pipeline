@@ -68,11 +68,12 @@ See [docs/architecture.md](docs/architecture.md) for the shared state contract a
 - Audit types: comprehensive GEO/SEO, technical, analytics tracking, competitor intelligence.
 - Every finding carries a severity, who fixes it (self-serve or developer), step-by-step remediation and a way to verify the fix.
 - Per-project token and cost logging.
+- A working task store implementing the lock protocol ([`tools/tasks_store.py`](tools/tasks_store.py)): atomic mkdir lock with backoff and a retry cap, stale locks surfaced instead of broken, atomic rename so readers never see a partial file, and validation that rejects malformed tasks. Eight tests cover 8 concurrent writers losing nothing, readers during writes, error cleanup, lock timeout, stale locks and validation. Run them with `python -m unittest tests.test_tasks_store`.
 
 **Roadmap**
 - Outcome tracking: before/after measurement per site (citations, traffic, fixes applied).
 - Stand up the staging site and its golden file, so changes to the agents are regression-tested before release (the process is specified in `skill-release-manager`).
-- Run the shared state layer (task file and per-client changelogs) live behind the dashboards (protocol documented in `docs/orchestrator/CONVENTIONS.md`).
+- Wire the task store into the agents and dashboards, and add per-client changelogs (protocol documented in `docs/orchestrator/CONVENTIONS.md`; the store itself is built and tested).
 
 ## Built with
 
