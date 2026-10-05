@@ -66,4 +66,4 @@ Edit in staging, run the whole pipeline against a disposable staging site with s
 
 ## Roadmap notes
 
-Referenced by the skills but not yet documented here: the shared conventions file, the credentials-handling doc, and the staging golden file. Add them or remove the references before publishing.
+Planned next: documents for the shared conventions, credentials handling and the staging golden file, which the skills already reference.
