@@ -63,11 +63,13 @@ def tasks_lock(state_dir=None, max_wait=10.0, stale_after=300.0):
         try:
             os.mkdir(lock)
             break
-        except FileExistsError:
+        except (FileExistsError, PermissionError):
+            # PermissionError: on Windows a lock folder that another process is deleting
+            # is briefly "access denied". That is contention, not a failure.
             try:
                 age = time.time() - lock.stat().st_mtime
-            except FileNotFoundError:
-                continue  # released between our mkdir and stat; try again at once
+            except (FileNotFoundError, PermissionError):
+                age = 0.0  # released (or being released) between our mkdir and stat
             if age > stale_after:
                 raise StaleLockError(
                     f"{lock} is {age:.0f}s old (limit {stale_after:.0f}s). "
@@ -80,7 +82,14 @@ def tasks_lock(state_dir=None, max_wait=10.0, stale_after=300.0):
     try:
         yield
     finally:
-        os.rmdir(lock)
+        for attempt in range(100):
+            try:
+                os.rmdir(lock)
+                break
+            except PermissionError:  # Windows: a reader or scanner may hold the folder for a moment
+                if attempt == 99:
+                    raise
+                time.sleep(0.01)
 
 
 def read_tasks(state_dir=None):

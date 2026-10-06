@@ -6,3 +6,5 @@ docs/profile-draft.md
 __pycache__/
 *.pyc
 examples/demo-dashboard.html
+# nested clone created by a verification run
+/geo-seo-agent-pipeline/

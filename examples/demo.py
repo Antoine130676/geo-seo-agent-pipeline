@@ -82,7 +82,10 @@ ts.set_status("th-1", "done", PM)
 print("   th-1 -> done")
 
 step("Progress dashboard (read-only view of the same file)")
-page = render_progress.render(ts.read_tasks(), has_changelog=lambda t: changelog.has_entry(t["client"], t["id"]))
+page = render_progress.render(
+    ts.read_tasks(), render_progress.recent_changelog(),
+    {"example.com": {"start_datetime": "2026-10-06T09:00:00+03:00"}},
+    has_changelog=lambda t: changelog.has_entry(t["client"], t["id"]))
 out = None
 if "--out" in sys.argv:
     out = Path(sys.argv[sys.argv.index("--out") + 1])

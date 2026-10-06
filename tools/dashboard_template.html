@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>GEO/SEO Pipeline: Progress dashboard</title>
+<style>
+  :root {
+    --bg: #10131A;
+    --panel: #171B24;
+    --panel-2: #1D222D;
+    --line: #272E3D;
+    --text: #E6EAF2;
+    --text-dim: #838EA3;
+    --text-faint: #565F72;
+    --amber: #E8A33D;
+    --amber-dim: #6B4F22;
+    --teal: #35B692;
+    --teal-dim: #1E4A3D;
+    --blue: #6C8CD5;
+    --blue-dim: #2B3A5C;
+    --coral: #E1605A;
+    --coral-dim: #5A2724;
+    --violet: #9B7FD4;
+    --gray: #4B5568;
+    --gray-dim: #262C38;
+    --mono: ui-monospace, SFMono-Regular, "JetBrains Mono", Consolas, monospace;
+    --sans: -apple-system, "Segoe UI", Inter, system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    padding: 28px 32px 50px;
+  }
+  .topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 18px;
+    margin-bottom: 20px;
+  }
+  .wordmark {
+    font-family: var(--mono);
+    font-size: 13px;
+    letter-spacing: 0.18em;
+    color: var(--text-faint);
+    text-transform: uppercase;
+    margin: 0 0 6px;
+  }
+  h1 { font-size: 21px; font-weight: 700; letter-spacing: -0.01em; margin: 0; }
+  .page-sub {
+    font-family: var(--mono); font-size: 11.5px; color: var(--text-dim);
+    margin: 6px 0 0;
+  }
+  .chip-date { color: var(--text-faint); margin-left: 4px; }
+  .sync { text-align: right; font-family: var(--mono); font-size: 12px; color: var(--text-dim); }
+  .sync .dot {
+    display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+    background: var(--teal); margin-right: 6px; box-shadow: 0 0 0 3px var(--teal-dim);
+  }
+  .filters { display: flex; gap: 8px; margin: 18px 0 22px; flex-wrap: wrap; }
+  .chip {
+    font-family: var(--mono); font-size: 12px; padding: 6px 12px; border-radius: 100px;
+    border: 1px solid var(--line); color: var(--text-dim); cursor: pointer;
+    background: var(--panel); user-select: none;
+  }
+  .chip.active { background: var(--panel-2); border-color: var(--text-dim); color: var(--text); }
+
+  .board {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 14px;
+    align-items: start;
+  }
+  .col {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    min-height: 120px;
+    display: flex;
+    flex-direction: column;
+  }
+  .col-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 14px;
+    border-bottom: 2px solid var(--head-color, var(--line));
+  }
+  .col-head .label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--head-color, var(--text-dim));
+  }
+  .col-head .count {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-faint);
+    background: var(--panel-2);
+    border-radius: 100px;
+    padding: 2px 8px;
+  }
+  .col-body { padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+  .col-empty { padding: 18px 10px; font-size: 12px; color: var(--text-faint); text-align: center; }
+
+  .card {
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--head-color, var(--line));
+    border-radius: 6px;
+    padding: 10px 12px;
+  }
+  .card.stale { border-left-color: var(--coral); background: #201A1A; }
+  .card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+  .card-id { font-family: var(--mono); font-size: 10px; color: var(--text-faint); }
+  .card-owner {
+    font-family: var(--mono); font-size: 9.5px; color: var(--text-dim);
+    background: var(--panel); border: 1px solid var(--line); border-radius: 100px;
+    padding: 1px 8px;
+  }
+  .card-title { font-size: 12.5px; color: var(--text); line-height: 1.4; margin-bottom: 6px; }
+  .card-dates { font-family: var(--mono); font-size: 10px; color: var(--text-faint); margin-bottom: 6px; }
+  .card-meta { display: flex; justify-content: space-between; align-items: center; }
+  .card-client { font-family: var(--mono); font-size: 10.5px; color: var(--text-dim); }
+  .card-blocked { font-family: var(--mono); font-size: 10.5px; color: var(--coral); margin-top: 6px; }
+  .card-stale-tag {
+    font-family: var(--mono); font-size: 9.5px; color: var(--coral);
+    text-transform: uppercase; letter-spacing: 0.06em; margin-top: 6px;
+  }
+
+  .progress-panel { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
+  .progress-row { display: grid; grid-template-columns: 170px 1fr 46px; align-items: center; gap: 14px; }
+  .progress-name { font-size: 12.5px; color: var(--text); }
+  .progress-since { font-family: var(--mono); font-size: 10px; color: var(--text-faint); display: block; margin-top: 2px; }
+  .progress-track { height: 8px; background: var(--line); border-radius: 4px; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--teal); border-radius: 4px; }
+  .progress-pct { font-family: var(--mono); font-size: 12px; color: var(--text-dim); text-align: right; }
+
+  .section-label {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--text-faint); margin: 32px 0 12px;
+  }
+  .changelog { display: flex; flex-direction: column; gap: 8px; }
+  .changelog-item {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 6px;
+    padding: 10px 14px; font-size: 12px;
+  }
+  .changelog-item .c-top {
+    display: flex; justify-content: space-between; color: var(--text-faint);
+    font-family: var(--mono); font-size: 10.5px; margin-bottom: 4px;
+  }
+  .changelog-item .c-action { color: var(--text); }
+  .changelog-item .c-verify { margin-top: 5px; font-family: var(--mono); font-size: 10.5px; color: var(--teal); }
+  .changelog-item.unverified .c-verify { color: var(--coral); }
+</style>
+</head>
+<body>
+
+  <div class="topbar">
+    <div>
+      <p class="wordmark">GEO/SEO Pipeline</p>
+      <h1 id="page-title">Kanban dashboard</h1>
+      <p id="page-sub" class="page-sub"></p>
+    </div>
+    <div class="sync">
+      <div><span class="dot"></span>live — regenerated by progress-dashboard agent</div>
+      <div id="synctime" style="margin-top:4px;"></div>
+    </div>
+  </div>
+
+  <div class="filters" id="filters"></div>
+
+  <p class="section-label" style="margin-top:0;">Progress by client</p>
+  <div class="progress-panel" id="progress-panel"></div>
+
+  <div class="board" id="board"></div>
+
+  <p class="section-label">Recent changes (from changelog)</p>
+  <div class="changelog" id="changelog"></div>
+
+<script>
+// Data is injected by tools/render_progress.py from tasks.json, the changelog files and engagements.json.
+const TASKS = /*__TASKS__*/[];
+const CHANGELOG = /*__CHANGELOG__*/[];
+const ENGAGEMENTS = /*__ENGAGEMENTS__*/{};
+
+function esc(v) {
+  return String(v ?? "").replace(/[&<>"']/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
+}
+
+function fmtStart(iso) {
+  const d = new Date(iso);
+  return d.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" }) +
+    " " + d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
+}
+
+const COLUMNS = [
+  { key: "todo",        label: "Todo",        color: "var(--gray)" },
+  { key: "in_progress", label: "In progress", color: "var(--amber)" },
+  { key: "waiting",     label: "Waiting",     color: "var(--blue)" },
+  { key: "blocked",     label: "Blocked",     color: "var(--coral)" },
+  { key: "review",      label: "Review",      color: "var(--violet)" },
+  { key: "done",        label: "Done",        color: "var(--teal)" },
+];
+const STALE_DAYS = 3;
+let activeClient = "all";
+
+function fmtDateShort(iso) {
+  return new Date(iso).toLocaleDateString(undefined, { month: "short", day: "numeric" });
+}
+
+function daysSince(iso) { return (Date.now() - new Date(iso).getTime()) / 86400000; }
+
+function render() {
+  const clients = ["all", ...new Set(TASKS.map(t => t.client))];
+  document.getElementById("filters").innerHTML = clients.map(c => {
+    const started = c !== "all" && ENGAGEMENTS[c] ? ` <span class="chip-date">since ${fmtStart(ENGAGEMENTS[c].start_datetime)}</span>` : "";
+    return `<div class="chip ${c === activeClient ? 'active' : ''}" data-client="${esc(c)}">${c === 'all' ? 'All clients' : esc(c)}${started}</div>`;
+  }).join("");
+  document.querySelectorAll(".chip").forEach(el =>
+    el.addEventListener("click", () => { activeClient = el.dataset.client; render(); })
+  );
+
+  const visible = activeClient === "all" ? TASKS : TASKS.filter(t => t.client === activeClient);
+  const activeStart = activeClient !== "all" && ENGAGEMENTS[activeClient] ? ENGAGEMENTS[activeClient].start_datetime : null;
+  document.getElementById("page-title").textContent =
+    activeClient === "all" ? "Kanban dashboard — all clients" : `Kanban dashboard — ${activeClient}`;
+  document.getElementById("page-sub").textContent = activeStart ? `Engagement started ${fmtStart(activeStart)}` : "";
+
+  const progressClients = activeClient === "all" ? clients.filter(c => c !== "all") : [activeClient];
+  document.getElementById("progress-panel").innerHTML = progressClients.map(c => {
+    const ts = TASKS.filter(t => t.client === c);
+    const done = ts.filter(t => t.status === "done").length;
+    const pct = ts.length ? Math.round((done / ts.length) * 100) : 0;
+    const since = ENGAGEMENTS[c] ? fmtStart(ENGAGEMENTS[c].start_datetime) : "";
+    return `<div class="progress-row">
+      <div><span class="progress-name">${esc(c)}</span><span class="progress-since">${since ? "since " + since : ""}</span></div>
+      <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
+      <div class="progress-pct">${pct}%</div>
+    </div>`;
+  }).join("");
+  document.getElementById("synctime").textContent = "last sync " + new Date().toISOString().slice(0,16).replace("T"," ");
+
+  document.getElementById("board").innerHTML = COLUMNS.map(col => {
+    const cards = visible.filter(t => t.status === col.key)
+      .slice().sort((a,b) => new Date(b.updated_at) - new Date(a.updated_at));
+    const body = cards.length
+      ? cards.map(t => {
+          const stale = (col.key === "waiting" || col.key === "blocked") && daysSince(t.updated_at) >= STALE_DAYS;
+          return `<div class="card ${stale ? 'stale' : ''}" style="--head-color:${col.color}">
+            <div class="card-top">
+              <span class="card-id">${esc(t.id)}</span>
+              <span class="card-owner">${esc(t.owner)}</span>
+            </div>
+            <div class="card-title">${esc(t.title)}</div>
+            <div class="card-dates">created ${fmtDateShort(t.created_at)} · updated ${Math.floor(daysSince(t.updated_at))}d ago</div>
+            <div class="card-meta">
+              <span class="card-client">${esc(t.client)}</span>
+            </div>
+            ${t.blocked_reason ? `<div class="card-blocked">${esc(t.blocked_reason)}</div>` : ""}
+            ${stale ? `<div class="card-stale-tag">stale — needs a nudge</div>` : ""}
+            ${t.unverified ? `<div class="card-stale-tag">unverified — no changelog entry</div>` : ""}
+          </div>`;
+        }).join("")
+      : `<div class="col-empty">Nothing here</div>`;
+    return `<div class="col">
+      <div class="col-head" style="--head-color:${col.color}">
+        <span class="label">${col.label}</span>
+        <span class="count">${cards.length}</span>
+      </div>
+      <div class="col-body">${body}</div>
+    </div>`;
+  }).join("");
+
+  const visibleLog = activeClient === "all" ? CHANGELOG : CHANGELOG.filter(c => c.client === activeClient);
+  document.getElementById("changelog").innerHTML = visibleLog.length
+    ? visibleLog.slice().sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp)).map(c => `
+      <div class="changelog-item ${c.verified_by ? '' : 'unverified'}">
+        <div class="c-top"><span>${esc(c.task_id)} · ${esc(c.client)}</span><span>${c.timestamp.slice(0,16).replace('T',' ')}</span></div>
+        <div class="c-action">${esc(c.action)}</div>
+        <div class="c-verify">${c.verified_by ? '✓ verified by ' + esc(c.verified_by) + ' — ' + esc(c.verification_method) : '⚠ no verification recorded yet'}</div>
+      </div>`).join("")
+    : `<div style="color:var(--text-faint); font-size:13px;">No changelog entries yet.</div>`;
+}
+
+render();
+</script>
+</body>
+</html>

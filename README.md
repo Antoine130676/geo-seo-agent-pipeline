@@ -1,5 +1,7 @@
 # GEO/SEO Agent Pipeline
 
+[![tests](https://github.com/Antoine130676/geo-seo-agent-pipeline/actions/workflows/tests.yml/badge.svg)](https://github.com/Antoine130676/geo-seo-agent-pipeline/actions/workflows/tests.yml) [![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 A multi-agent design for delivering GEO (Generative Engine Optimization) and technical SEO work to clients, built as a set of Claude/Hermes agent skills. Each agent is a `SKILL.md` with a defined job, checklist, output format and handoff.
 
 > **Status: working design, not a product.** The `skills/` folder holds the agent specifications as they exist today. Outcome numbers (traffic, citations, hours saved) are not claimed here. See [Status](#status) for what is and isn't proven.
@@ -83,6 +85,10 @@ See [docs/architecture.md](docs/architecture.md) for the shared state contract a
 ## Built with
 
 Claude Code, Hermes Agent (self-hosted, persistent memory), OmniRoute model routing.
+
+## License
+
+MIT, see [LICENSE](LICENSE).
 
 ## Author
 

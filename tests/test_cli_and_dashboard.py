@@ -67,21 +67,24 @@ class CliAndDashboardTests(unittest.TestCase):
         self.assertEqual(self.cli("add", "--id", "x", "--client", "c", "--agent", "a").returncode, 2)
         self.assertEqual(json.loads(self.cli("list", "--json").stdout)[0]["status"], "todo")
 
-    def test_dashboard_progress_stale_unverified_and_escaping(self):
-        old = (datetime.now(timezone.utc) - timedelta(days=5)).isoformat()
-        base = {"client": "example.com", "agent": "technical-health", "owner": "technical-health"}
+    def test_dashboard_embeds_data_flags_unverified_and_is_script_safe(self):
+        base = {"client": "example.com", "agent": "technical-health", "owner": "technical-health",
+                "updated_at": "2026-10-01T09:00:00+03:00", "created_at": "2026-10-01T09:00:00+03:00"}
         tasks = [
-            {**base, "id": "1", "status": "done", "title": "a", "updated_at": old},
-            {**base, "id": "2", "status": "blocked", "title": "<script>alert(1)</script>",
-             "blocked_reason": "waiting on DNS", "updated_at": old},
+            {**base, "id": "1", "status": "done", "title": "closed without a log"},
+            {**base, "id": "2", "status": "blocked", "title": "</script><script>alert(1)</script>",
+             "blocked_reason": "waiting on DNS"},
         ]
-        page = rp.render(tasks, has_changelog=lambda t: False)
-        self.assertIn("50%", page)                 # 1 of 2 done
-        self.assertIn("STALE", page)               # blocked for 5 days
-        self.assertIn("UNVERIFIED", page)          # done with no changelog entry
-        self.assertIn("Review (0)", page)
-        self.assertNotIn("<script>alert", page)    # task text is escaped
-        self.assertIn("&lt;script&gt;", page)
+        page = rp.render(tasks, [{"timestamp": "2026-10-01T10:00", "client": "example.com", "task_id": "1",
+                                  "action": "x", "verified_by": None, "verification_method": None}],
+                         {"example.com": {"start_datetime": "2026-09-30T09:00:00+03:00"}},
+                         has_changelog=lambda t: False)
+        self.assertIn('"unverified": true', page)             # done, but no changelog entry
+        self.assertIn('label: "Review"', page)                # the review column exists
+        self.assertIn("2026-09-30T09:00:00+03:00", page)      # engagement start date embedded
+        self.assertNotIn("</script><script>alert", page)      # embedded data cannot break out of the script
+        self.assertIn("function esc(", page)                  # and cards escape task text when rendered
+        self.assertNotIn("__TASKS__", page)                   # every placeholder was filled
 
 
 if __name__ == "__main__":
