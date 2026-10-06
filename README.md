@@ -75,6 +75,7 @@ See [docs/architecture.md](docs/architecture.md) for the shared state contract a
 - Audit types: comprehensive GEO/SEO, technical, analytics tracking, competitor intelligence.
 - Every finding carries a severity, who fixes it (self-serve or developer), step-by-step remediation and a way to verify the fix.
 - Per-project token and cost logging.
+- Operated from Telegram: my AI assistant is connected to the Hermes Agent gateway through a Telegram bot. I message it from my phone to give instructions and run tasks. Access is limited to an allow-list of approved users, and the project manager's approval requests and alerts are designed to reach me on the same channel (see [conventions](docs/orchestrator/CONVENTIONS.md)). In the last 30 days the channel carried 4 working sessions and 932 messages.
 - A working task store and CLI ([`tools/`](tools/)) implementing the lock protocol: atomic mkdir lock with backoff and a retry cap, stale locks surfaced instead of broken, atomic rename so readers never see a partial file, validation that rejects malformed tasks. Authorization is enforced in code: agents change only their own tasks, finish at `review`, and only the project manager can mark a task `done`, and only when the client's append-only changelog has an entry for it. A read-only progress dashboard is rendered from the same file. 13 tests cover concurrent writers, readers during writes, error cleanup, lock timeouts, stale locks, validation, authorization and the dashboard. Run them with `python -m unittest discover -s tests`.
 
 **Roadmap**
